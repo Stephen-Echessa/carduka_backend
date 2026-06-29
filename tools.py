@@ -4,9 +4,10 @@ import httpx
 from bs4 import BeautifulSoup
 from typing import Dict, Any, List
 import re
-import requests
+# import requests
 import random
 from urllib.parse import urlencode
+from curl_cffi import requests
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -77,7 +78,7 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     # }
     
     try:
-        response = requests.get(target_url, headers={'User-Agent': random.choice(user_agents_list)}, timeout=30)
+        response = requests.get(target_url, impersonate="chrome124")
         if response.status_code != 200:
             raise RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}")
             

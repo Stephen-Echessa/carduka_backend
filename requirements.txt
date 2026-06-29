@@ -8,3 +8,4 @@ langgraph-checkpoint-sqlite
 pydantic
 aiosqlite
 python-dotenv
+curl_cffi
