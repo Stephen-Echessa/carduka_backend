@@ -59,7 +59,8 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
 
     payload = {
         "api_key": SCRAPEOPS_API_KEY,
-        "url": target_url
+        "url": target_url,
+        'bypass': 'cloudflare_level_1'
     }
     proxy_url = f"https://proxy.scrapeops.io/v1/?{urlencode(payload)}"
     # proxies = {
