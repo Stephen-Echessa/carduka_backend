@@ -51,19 +51,27 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     search_query = f"{make} {model} {year}".strip().replace(" ", "+")
     target_url = f"https://www.cars45.co.ke/listing?query={search_query}"
 
-    SCRAPEOPS_API_KEY = os.environ.get("SCRAPEOPS_API_KEY")
-    proxy_url = f"https://proxy.scrapeops.io/v1/?api_key={SCRAPEOPS_API_KEY}&url={target_url}"
+    # SCRAPEOPS_API_KEY = os.environ.get("SCRAPEOPS_API_KEY")
+    # proxy_url = f"https://proxy.scrapeops.io/v1/?api_key={SCRAPEOPS_API_KEY}&url={target_url}"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
         "Referer": "https://www.google.com/",
-        "Connection": "keep-alive"
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    }
+
+    proxies = {
+        "http": "http://sbrdipaf:9xamdocqqt1p@31.59.20.176:6754",
+        "https": "http://sbrdipaf:9xamdocqqt1p@31.59.20.176:6754",
     }
     
     try:
-        response = requests.get(proxy_url, headers=headers)
+        response = requests.get(target_url, headers=headers, proxies=proxies, timeout=15)
         if response.status_code != 200:
             raise RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}")
             
