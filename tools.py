@@ -61,7 +61,7 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     try:
         response = httpx.get(url, headers=headers, timeout=10.0)
         if response.status_code != 200:
-            raise RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}")
+            print(RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}"))
             return []
             
         soup = BeautifulSoup(response.text, "html.parser")
@@ -71,7 +71,7 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
         cards = soup.find_all("a", class_="car-feature")
         
         if not cards:
-            raise RuntimeError("Cars45 webscraping fallback failed: DOM structure altered or anti-bot challenge encountered.")
+            print(RuntimeError("Cars45 webscraping fallback failed: DOM structure altered or anti-bot challenge encountered."))
             return []
             
         # Parse and cap at the top 5 items for lean state context
