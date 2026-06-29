@@ -1,0 +1,7 @@
+.env
+myduka-env
+__pycache__
+carduka_market.db
+checkpoints.db
+checkpoints.db-shm
+checkpoints.db-wal
