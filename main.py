@@ -34,8 +34,7 @@ app = FastAPI(title="CarDuka Agentic Valuation Backend", lifespan=lifespan)
 origins = [
     "http://localhost:3000",   # Next.js local development port
     "http://127.0.0.1:3000",
-    ""
-    # Add your production Vercel frontend URL here later
+    "https://carduka-frontend.vercel.app"
 ]
 
 app.add_middleware(
