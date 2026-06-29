@@ -1,9 +1,14 @@
+import os
 import sqlite3
 import httpx
 from bs4 import BeautifulSoup
 from typing import Dict, Any, List
 import re
 import requests
+
+from dotenv import load_dotenv
+load_dotenv()
+
 
 DB_PATH = "carduka_market.db"
 
@@ -44,7 +49,10 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     Raises explicit RuntimeError on scraping error to execute your rigid fallback rule.
     """
     search_query = f"{make} {model} {year}".strip().replace(" ", "+")
-    url = f"https://www.cars45.co.ke/listing?query={search_query}"
+    target_url = f"https://www.cars45.co.ke/listing?query={search_query}"
+
+    SCRAPEOPS_API_KEY = os.environ.get("SCRAPEOPS_API_KEY")
+    proxy_url = f"https://proxy.scrapeops.io/v1/?api_key={SCRAPEOPS_API_KEY}&url={target_url}"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -55,7 +63,7 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     }
     
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(proxy_url, headers=headers)
         if response.status_code != 200:
             raise RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}")
             
