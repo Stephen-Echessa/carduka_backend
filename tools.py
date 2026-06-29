@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from typing import Dict, Any, List
 import re
 import requests
+import random
 from urllib.parse import urlencode
 
 from dotenv import load_dotenv
@@ -52,24 +53,31 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     search_query = f"{make} {model} {year}".strip().replace(" ", "+")
     target_url = f"https://www.cars45.co.ke/listing?query={search_query}"
 
-    SCRAPEOPS_API_KEY = os.environ.get("SCRAPEOPS_API_KEY")
-    if not SCRAPEOPS_API_KEY:
-        print("⚠️ Missing SCRAPEOPS_API_KEY env variable! Skipping live scrape.")
-        return []
+    user_agents_list = [
+        'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
+    ]
 
-    payload = {
-        "api_key": SCRAPEOPS_API_KEY,
-        "url": target_url,
-        'bypass': 'cloudflare_level_1'
-    }
-    proxy_url = f"https://proxy.scrapeops.io/v1/?{urlencode(payload)}"
+    # SCRAPEOPS_API_KEY = os.environ.get("SCRAPEOPS_API_KEY")
+    # if not SCRAPEOPS_API_KEY:
+    #     print("⚠️ Missing SCRAPEOPS_API_KEY env variable! Skipping live scrape.")
+    #     return []
+
+    # payload = {
+    #     "api_key": SCRAPEOPS_API_KEY,
+    #     "url": target_url,
+    #     'bypass': 'cloudflare_level_1'
+    # }
+    # proxy_url = f"https://proxy.scrapeops.io/v1/?{urlencode(payload)}"
+
     # proxies = {
     #     "http": "http://sbrdipaf:9xamdocqqt1p@31.59.20.176:6754",
     #     "https": "http://sbrdipaf:9xamdocqqt1p@31.59.20.176:6754",
     # }
     
     try:
-        response = requests.get(proxy_url, timeout=30)
+        response = requests.get(target_url, headers={'User-Agent': random.choice(user_agents_list)}, timeout=30)
         if response.status_code != 200:
             raise RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}")
             
