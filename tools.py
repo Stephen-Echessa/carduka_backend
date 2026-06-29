@@ -3,6 +3,7 @@ import httpx
 from bs4 import BeautifulSoup
 from typing import Dict, Any, List
 import re
+import requests
 
 DB_PATH = "carduka_market.db"
 
@@ -46,20 +47,15 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
     url = f"https://www.cars45.co.ke/listing?query={search_query}"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
         "Referer": "https://www.google.com/",
-        "Connection": "keep-alive",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "cross-site",
-        "Upgrade-Insecure-Requests": "1"
+        "Connection": "keep-alive"
     }
     
     try:
-        response = httpx.get(url, headers=headers, timeout=10.0, http2=True)
+        response = requests.get(url, headers=headers)
         if response.status_code != 200:
             raise RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}")
             
