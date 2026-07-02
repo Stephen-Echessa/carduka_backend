@@ -61,7 +61,7 @@ def scrape_cars45_listings(make: str, model: str, year: int) -> List[Dict[str, A
     try:
         response = httpx.get(url, headers=headers, timeout=10.0, follow_redirects=True)
         if response.status_code != 200:
-            raise RuntimeError(f"Jiji webscraping fallback failed: HTTP status code {response.status_code}")
+            raise RuntimeError(f"Jiji webscraping fallback failed: HTTP status code {response.status_code} {response.headers} {response.text[:2000]}")
 
         soup = BeautifulSoup(response.text, "html.parser")
         listings = []
