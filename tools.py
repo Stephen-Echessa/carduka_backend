@@ -70,8 +70,7 @@ def scrape_cars45_listings(make: str, model: str, year: int) -> List[Dict[str, A
         cards = soup.find_all("a", class_=lambda c: c and "qa-advert-list-item" in c.split())
 
         if not cards:
-            print(RuntimeError("Jiji webscraping fallback failed: DOM structure altered or anti-bot challenge encountered."))
-            return []
+            raise RuntimeError("Jiji webscraping fallback failed: DOM structure altered or anti-bot challenge encountered.")
 
         for card in cards[:5]:
             name_el = card.find("div", class_="qa-advert-title")
