@@ -37,14 +37,14 @@ def query_historical_sales(make: str, model: str, year: int, mileage: int) -> Di
     }
 
 
-def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, Any]]:
+def scrape_cars45_listings(make: str, model: str, year: int) -> List[Dict[str, Any]]:
     """
-    Scrapes live car records off cars45.co.ke using the requested query route.
+    Scrapes live car records off jiji.co.ke using the requested query route.
     Raises explicit RuntimeError on scraping error to execute your rigid fallback rule.
     """
     search_query = f"{make} {model} {year}".strip().replace(" ", "+")
-    url = f"https://www.cars45.co.ke/listing?query={search_query}"
-    
+    url = f"https://www.jiji.co.ke/cars?query={search_query}"
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
@@ -57,65 +57,55 @@ def scrape_cars45_listings(make: str, model: str, year:int) -> List[Dict[str, An
         "Sec-Fetch-Site": "cross-site",
         "Upgrade-Insecure-Requests": "1"
     }
-    
+
     try:
-        response = httpx.get(url, headers=headers, timeout=10.0)
+        response = httpx.get(url, headers=headers, timeout=10.0, follow_redirects=True)
         if response.status_code != 200:
-            print(RuntimeError(f"Cars45 webscraping fallback failed: HTTP status code {response.status_code}"))
+            print(RuntimeError(f"Jiji webscraping fallback failed: HTTP status code {response.status_code}"))
             return []
-            
+
         soup = BeautifulSoup(response.text, "html.parser")
         listings = []
-        
-        # FIX: Target the exact anchor element cards found on Cars45
-        cards = soup.find_all("a", class_="car-feature")
-        
+
+        cards = soup.find_all("a", class_=lambda c: c and "qa-advert-list-item" in c.split())
+
         if not cards:
-            print(RuntimeError("Cars45 webscraping fallback failed: DOM structure altered or anti-bot challenge encountered."))
+            print(RuntimeError("Jiji webscraping fallback failed: DOM structure altered or anti-bot challenge encountered."))
             return []
-            
-        # Parse and cap at the top 5 items for lean state context
-        for card in cards[:5]: 
-            name_el = card.find("p", class_="car-feature__name")
+
+        for card in cards[:5]:
+            name_el = card.find("div", class_="qa-advert-title")
             if not name_el:
                 continue
             title_text = name_el.get_text(strip=True)
-            
-            # Guardrail: Ensure it actually matches the requested vehicle manufacturer & model
+
             if make.lower() not in title_text.lower() or model.lower() not in title_text.lower():
                 continue
-                
-            # Extract and parse pricing cleanly
-            amount_el = card.find("p", class_="car-feature__amount")
+
+            amount_el = card.find("div", class_="qa-advert-price")
             extracted_price = "Inquire for price"
             if amount_el:
                 price_text = amount_el.get_text(strip=True)
-                # Pull raw digits out of "KSh 5,249,999" -> 5249999
                 digits = re.sub(r"\D", "", price_text)
                 if digits:
                     extracted_price = f"KSh {int(digits):,}"
 
             condition = "Unknown"
-            
-            other_items = card.find_all("span", class_="car-feature__others__item")
+            other_items = card.find_all("div", class_="b-list-advert-base__item-attr")
             for item in other_items:
                 item_text = item.get_text(strip=True)
-                
-                # Capture condition metrics (e.g., "Foreign Used" or "Local Used")
                 if "used" in item_text.lower() or "new" in item_text.lower():
                     condition = item_text
-            
-            # Build the clean state object map
+
             listings.append({
                 "raw_details": title_text,
                 "extracted_price": extracted_price,
                 "condition": condition
             })
-            
+
         return listings
-        
+
     except Exception as e:
-        # Wrap cleanly to trigger the strict fallback constraint
         raise RuntimeError(f"Live market scraping tool error: {str(e)}")
     
 
